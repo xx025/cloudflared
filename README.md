@@ -7,7 +7,7 @@ Minimal Docker repository for running `cloudflared` on Back4App Containers.
 This container starts a named Cloudflare Tunnel with a token:
 
 ```sh
-cloudflared tunnel --no-autoupdate --metrics 0.0.0.0:${PORT:-8080} run --token "$TUNNEL_TOKEN"
+cloudflared tunnel --no-autoupdate --edge-ip-version 4 --metrics 0.0.0.0:${PORT:-8080} run --token "$TUNNEL_TOKEN"
 ```
 
 The metrics server listens on Back4App's `PORT` environment variable so the container has an HTTP port for health checks.
@@ -21,6 +21,15 @@ TUNNEL_TOKEN=your_cloudflare_tunnel_token
 ```
 
 Do not commit the token to Git.
+
+Optional:
+
+```text
+TUNNEL_EDGE_IP_VERSION=4
+```
+
+This defaults to IPv4 because some container platforms do not provide usable IPv6
+egress. You can set it to `auto` or `6` only if the platform has working IPv6.
 
 ## Local test
 
@@ -60,3 +69,20 @@ codex-oauth-proxy Worker -> HTTPS relay hostname -> Back4App relay container -> 
 ```
 
 This repository only runs the tunnel connector. Add a relay app in the same container or deploy it as a separate Back4App app, then map the tunnel public hostname to that relay's local port.
+
+## IPv6 note
+
+If you see errors like this in Back4App logs:
+
+```text
+unable to dial tcp to origin [2606:4700:...]:443: connect: cannot assign requested address
+```
+
+the container is being asked to connect to an IPv6 destination but the runtime
+does not have a usable IPv6 source address. This image forces the `cloudflared`
+edge connection to IPv4 by default. If the log still says
+`originService=warp-routing`, then the IPv6 address is the upstream destination
+selected by Cloudflare's WARP/VPC path, not the tunnel's Cloudflare edge
+connection. In that case the reliable fix is to run an IPv4-only HTTPS relay in
+the container and have the Worker call that relay instead of sending the final
+ChatGPT/OpenAI hostname through WARP routing directly.
