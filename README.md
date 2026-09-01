@@ -4,6 +4,8 @@ Minimal Docker image for running `cloudflared` as a Cloudflare Tunnel connector.
 
 This repository is a reference implementation for the VPC egress side of CloudRouter deployments. It is intentionally small so it can run on any container platform that supports Dockerfile-based deployments and outbound HTTPS access.
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https%3A%2F%2Fgithub.com%2Fxx025%2Fcloud-router-vpc-egress&envs=TUNNEL_TOKEN&TUNNEL_TOKENDesc=Cloudflare+Tunnel+token+used+by+cloudflared)
+
 ## What This Does
 
 The container starts a named Cloudflare Tunnel with a token:
@@ -58,6 +60,16 @@ curl http://localhost:8080/ready
 3. Deploy this repository with the included `Dockerfile`.
 4. Set the exposed HTTP port to `8080`, or let the platform inject `PORT`.
 5. Use the Tunnel/VPC egress ID as CloudRouter's `CLOUDFLARE_TUNNEL_ID` build variable.
+
+## Railway Deploy
+
+Click the Railway button above, then set:
+
+```text
+TUNNEL_TOKEN=your_cloudflare_tunnel_token
+```
+
+Railway will build the included `Dockerfile`. The container exposes `PORT` for the `cloudflared` metrics endpoint, which is enough for Railway health checks.
 
 ## CloudRouter Integration
 
