@@ -65,25 +65,3 @@ Some `cloudflared` versions also expose:
 ```sh
 curl http://localhost:8080/ready
 ```
-
-## CloudRouter Integration
-
-CloudRouter requires the `NATIVE_EGRESS` Cloudflare VPC Network binding. This connector gives Cloudflare a running tunnel endpoint that can be selected for that binding.
-
-Typical flow:
-
-```text
-CloudRouter Worker -> Cloudflare VPC egress binding -> cloudflared connector -> approved upstream HTTPS hosts
-```
-
-CloudRouter still enforces its own upstream host allowlist and requires the `NATIVE_EGRESS` binding. Do not replace the binding with ordinary Worker fetch egress.
-
-## IPv6 Note
-
-If you see errors like this in container logs:
-
-```text
-unable to dial tcp to origin [2606:4700:...]:443: connect: cannot assign requested address
-```
-
-the container is being asked to connect to an IPv6 destination but the runtime does not have a usable IPv6 source address. This image forces the `cloudflared` edge connection to IPv4 by default.

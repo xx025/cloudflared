@@ -65,25 +65,3 @@ curl http://localhost:8080/metrics
 ```sh
 curl http://localhost:8080/ready
 ```
-
-## CloudRouter 集成
-
-CloudRouter 要求使用 `NATIVE_EGRESS` Cloudflare VPC Network binding。这个 connector 可以作为该 binding 可选择的 tunnel endpoint。
-
-典型链路：
-
-```text
-CloudRouter Worker -> Cloudflare VPC egress binding -> cloudflared connector -> approved upstream HTTPS hosts
-```
-
-CloudRouter 仍会执行自己的上游 host allowlist，并要求 `NATIVE_EGRESS` binding。不要用普通 Worker fetch egress 替代这个 binding。
-
-## IPv6 说明
-
-如果容器日志出现：
-
-```text
-unable to dial tcp to origin [2606:4700:...]:443: connect: cannot assign requested address
-```
-
-说明容器运行时可能没有可用的 IPv6 源地址。本镜像默认强制 `cloudflared` 使用 IPv4 连接 Cloudflare edge。
