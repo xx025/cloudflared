@@ -2,7 +2,7 @@
 set -eu
 
 if [ -z "${TUNNEL_TOKEN:-}" ]; then
-  echo "TUNNEL_TOKEN is required. Create a Cloudflare Tunnel and paste its token into Back4App environment variables." >&2
+  echo "TUNNEL_TOKEN is required. Create a Cloudflare Tunnel and paste its token into your container environment variables." >&2
   exit 1
 fi
 

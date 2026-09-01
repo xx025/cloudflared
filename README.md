@@ -1,20 +1,22 @@
-# Back4App Cloudflared Tunnel
+# CloudRouter VPC Egress Connector
 
-Minimal Docker repository for running `cloudflared` on Back4App Containers.
+Minimal Docker image for running `cloudflared` as a Cloudflare Tunnel connector.
 
-## What this does
+This repository is a reference implementation for the VPC egress side of CloudRouter deployments. It is intentionally small so it can run on any container platform that supports Dockerfile-based deployments and outbound HTTPS access.
 
-This container starts a named Cloudflare Tunnel with a token:
+## What This Does
+
+The container starts a named Cloudflare Tunnel with a token:
 
 ```sh
 cloudflared tunnel --no-autoupdate --edge-ip-version 4 --metrics 0.0.0.0:${PORT:-8080} run --token "$TUNNEL_TOKEN"
 ```
 
-The metrics server listens on Back4App's `PORT` environment variable so the container has an HTTP port for health checks.
+The metrics server listens on `PORT` so container platforms have an HTTP endpoint for health checks.
 
-## Required Back4App environment variable
+## Required Environment Variable
 
-Set this in Back4App Containers:
+Set this in your container platform:
 
 ```text
 TUNNEL_TOKEN=your_cloudflare_tunnel_token
@@ -28,10 +30,9 @@ Optional:
 TUNNEL_EDGE_IP_VERSION=4
 ```
 
-This defaults to IPv4 because some container platforms do not provide usable IPv6
-egress. You can set it to `auto` or `6` only if the platform has working IPv6.
+This defaults to IPv4 because some container platforms do not provide usable IPv6 egress. Set it to `auto` or `6` only if the platform has working IPv6.
 
-## Local test
+## Local Test
 
 ```sh
 export TUNNEL_TOKEN="your_cloudflare_tunnel_token"
@@ -50,39 +51,34 @@ Some `cloudflared` versions also expose:
 curl http://localhost:8080/ready
 ```
 
-## Back4App deploy
+## Deploy
 
-1. Push this folder to a GitHub repository.
-2. Create a Back4App Container app from that repository.
-3. Use `Dockerfile` as the Dockerfile path.
-4. Set `TUNNEL_TOKEN` in environment variables.
-5. Set the exposed port to `8080`, or let Back4App inject `PORT`.
+1. Create a Cloudflare Tunnel for CloudRouter egress.
+2. Copy the tunnel token into your container platform as `TUNNEL_TOKEN`.
+3. Deploy this repository with the included `Dockerfile`.
+4. Set the exposed HTTP port to `8080`, or let the platform inject `PORT`.
+5. Use the Tunnel/VPC egress ID as CloudRouter's `CLOUDFLARE_TUNNEL_ID` build variable.
 
-## Important note for egress
+## CloudRouter Integration
 
-`cloudflared` exposes services behind the container to Cloudflare. It does not by itself turn Cloudflare Workers into a different outbound IP.
+CloudRouter requires the `NATIVE_EGRESS` Cloudflare VPC Network binding. This connector gives Cloudflare a running tunnel endpoint that can be selected for that binding.
 
-For your `codex-oauth-proxy` egress problem, you normally still need a relay service behind the tunnel, for example:
+Typical flow:
 
 ```text
-codex-oauth-proxy Worker -> HTTPS relay hostname -> Back4App relay container -> OpenAI
+CloudRouter Worker -> Cloudflare VPC egress binding -> cloudflared connector -> approved upstream HTTPS hosts
 ```
 
-This repository only runs the tunnel connector. Add a relay app in the same container or deploy it as a separate Back4App app, then map the tunnel public hostname to that relay's local port.
+CloudRouter still enforces its own upstream host allowlist and requires the `NATIVE_EGRESS` binding. Do not replace the binding with ordinary Worker fetch egress.
 
-## IPv6 note
+## IPv6 Note
 
-If you see errors like this in Back4App logs:
+If you see errors like this in container logs:
 
 ```text
 unable to dial tcp to origin [2606:4700:...]:443: connect: cannot assign requested address
 ```
 
-the container is being asked to connect to an IPv6 destination but the runtime
-does not have a usable IPv6 source address. This image forces the `cloudflared`
-edge connection to IPv4 by default. If the log still says
-`originService=warp-routing`, then the IPv6 address is the upstream destination
-selected by Cloudflare's WARP/VPC path, not the tunnel's Cloudflare edge
-connection. In that case the reliable fix is to run an IPv4-only HTTPS relay in
-the container and have the Worker call that relay instead of sending the final
-ChatGPT/OpenAI hostname through WARP routing directly.
+the container is being asked to connect to an IPv6 destination but the runtime does not have a usable IPv6 source address. This image forces the `cloudflared` edge connection to IPv4 by default.
+
+If the log still says `originService=warp-routing`, then the IPv6 address is the upstream destination selected by Cloudflare's WARP/VPC path, not the tunnel's Cloudflare edge connection. In that case, use an IPv4-capable runtime or place an IPv4-only HTTPS relay behind the tunnel.
