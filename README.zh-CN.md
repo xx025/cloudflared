@@ -6,7 +6,7 @@
 
 本仓库是 CloudRouter VPC 出口的一种参考实现，只关注 `cloudflared`，适合部署到任何支持 Dockerfile 和出站 HTTPS 的容器平台。
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https%3A%2F%2Fgithub.com%2Fxx025%2Fcloudflared&envs=TUNNEL_TOKEN&TUNNEL_TOKENDesc=Cloudflare+Tunnel+token+used+by+cloudflared)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new)
 
 ## 官方文档
 
@@ -45,7 +45,7 @@ TUNNEL_EDGE_IP_VERSION=4
 
 ## Railway 快速部署
 
-点击上方 Railway 按钮，然后填写 `TUNNEL_TOKEN`。Railway 会构建仓库内的 `Dockerfile`，并通过 `PORT` 暴露 `cloudflared` metrics 端点。
+点击上方 Railway 按钮，选择 **Deploy from GitHub repo**，选择 `xx025/cloudflared`，然后填写 `TUNNEL_TOKEN`。Railway 会根据 `railway.json` 构建仓库内的 `Dockerfile`，并通过 `PORT` 暴露 `cloudflared` metrics 端点。
 
 ## 本地测试
 

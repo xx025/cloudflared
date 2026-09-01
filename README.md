@@ -6,7 +6,7 @@ Minimal Docker image for running `cloudflared` as a Cloudflare Tunnel connector.
 
 This repository is a CloudRouter VPC egress reference implementation. It focuses only on `cloudflared` and can run on any container platform that supports Dockerfile-based deployments and outbound HTTPS access.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https%3A%2F%2Fgithub.com%2Fxx025%2Fcloudflared&envs=TUNNEL_TOKEN&TUNNEL_TOKENDesc=Cloudflare+Tunnel+token+used+by+cloudflared)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new)
 
 ## Official Documentation
 
@@ -45,7 +45,7 @@ This defaults to IPv4 because some container platforms do not provide usable IPv
 
 ## Railway Deploy
 
-Click the Railway button above, then set `TUNNEL_TOKEN`. Railway builds the included `Dockerfile` and exposes `PORT` for the `cloudflared` metrics endpoint.
+Click the Railway button above, choose **Deploy from GitHub repo**, select `xx025/cloudflared`, then set `TUNNEL_TOKEN`. Railway builds the included `Dockerfile` using `railway.json` and exposes `PORT` for the `cloudflared` metrics endpoint.
 
 ## Local Test
 
